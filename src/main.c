@@ -50,16 +50,18 @@ struct simtk_widget *consolewindow;
 void simtk_widget_make_draggable (struct simtk_widget *);
 
 char *motd =
-  "\n"
-  "     Welcome to Vix - v0.1.1  \n"
-  "     (c) 2014 Gonzalo J. Carracedo (BatchDrake)\n"
-  "\n"
-  "WHAT'S NEW:\n"
-  "Lots of bugfixes and optimizations. I managed to update those\n"
-  "portions of the workspace that are actually dirty, this should\n"
-  "improve responsiveness. Also, you can cycle opened windows by\n"
-  "pressing Ctrl+<TAB>.\n\n"
-  "Type `help' and press ENTER to get a list of available commands\n\n";
+    "\n"
+    "     Welcome to Vix - v0.1.2  \n"
+    "     (c) 2014 Gonzalo J. Carracedo (BatchDrake)\n"
+    "\n"
+    "WHAT'S NEW:\n"
+    "More bugfixes. I removed the scripting support because it seems that\n"
+    "nobody will use it at all. I also made some changes in window dragging,\n"
+    "now dragging is restricted to title bar (and the whole window using\n"
+    "Ctrl+Drag). Window dragging using the Ctrl key doesn't work in this,\n"
+    "release, I need to fix a few more things regarding event cascading first.\n\n"
+
+    "Type `help' and press ENTER to get a list of available commands\n\n";
 
 int
 vix_console_onfocus (enum simtk_event_type type, struct simtk_widget *widget, struct simtk_event *event)
@@ -292,6 +294,8 @@ vix_console_onsubmit (enum simtk_event_type type, struct simtk_widget *widget, s
     }
 
   simtk_entry_clear (widget);
+
+  return HOOK_RESUME_CHAIN;
 }
 
 int
@@ -328,7 +332,7 @@ main (int argc, char *argv[], char *envp[])
     exit (EXIT_FAILURE);
 
 #ifndef SDL2_ENABLED
-  SDL_EnableKeyRepeat (SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL / 4);
+  SDL_EnableKeyRepeat (SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 #endif
   
   if (simtk_init_from_display (disp) == -1)
@@ -344,11 +348,6 @@ main (int argc, char *argv[], char *envp[])
     fprintf (stderr, "%s: cannot create Vix console window!\n", argv[0]);
     exit (EXIT_FAILURE);
   }
-
-  vix_scripting_init ();
-
-  if (vix_scripting_directory_init (VIX_SCRIPTS_DIR) == -1)
-    scprintf (console, "warning: cannot open scripts directory %s: %s\n\n", VIX_SCRIPTS_DIR, strerror (errno));
   
   /* TODO: global list of file maps */
   
